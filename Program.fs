@@ -2,17 +2,23 @@
 
 type Symbol = X | O
 
-type PlayerInput =
-    | Human
-    | Computer
-
-type Player = Symbol * PlayerInput
-
 type Cell = Full of Symbol | Empty
 
 type Board = Cell list
 
-type Game =
+type Position = int
+
+type Move = Game -> Position * Symbol
+
+and [<NoEquality>] [<NoComparison>]
+    Player =
+    {
+        symbol: Symbol
+        strategy: Game -> Move
+    }
+
+and [<NoEquality>] [<NoComparison>]
+    Game =
     {
         board: Board
         players: Player * Player
@@ -32,13 +38,11 @@ let cellEmpty position board =
     List.nth board (position - 1) = Empty
 
 let playMove player position game =
-    let (symbol, _) = player
-
     let nextPlayer =
         let (p1, p2) = game.players
-        if player = p1 then p2 else p1
+        if player.symbol = p1.symbol then p2 else p1
     {game with
-        board = updateBoard symbol position game.board
+        board = updateBoard player.symbol position game.board
         nextPlayer = nextPlayer}
 
 let drawBoard board =
@@ -68,8 +72,8 @@ let drawGame game =
     game
 
 let makeGame playerXInput playerOInput =
-    let playerX = X, playerXInput
-    let playerO = O, playerOInput
+    let playerX = {symbol = X; strategy = playerXInput}
+    let playerO = {symbol = O; strategy = playerOInput}
     {
         board = startingBoard
         players = playerX, playerO
@@ -78,7 +82,11 @@ let makeGame playerXInput playerOInput =
 
 [<EntryPoint>]
 let main argv = 
-    let game = makeGame Human Human
+    let dummyStrategy =
+        let dummyMove =
+            (fun _ -> 1, X)
+        (fun _ -> dummyMove)
+    let game = makeGame dummyStrategy dummyStrategy
     let (p1, p2) = game.players
     game |> drawGame
     |> playMove p1 1 |> drawGame
