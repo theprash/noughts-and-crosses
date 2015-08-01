@@ -12,14 +12,14 @@ type Position = int
 
 type Strategy = Board -> Symbol -> Position
 
-and [<NoEquality>] [<NoComparison>]
+type [<NoEquality>] [<NoComparison>]
     Player =
     {
         symbol: Symbol
         strategy: Strategy
     }
 
-and [<NoEquality>] [<NoComparison>]
+type [<NoEquality>] [<NoComparison>]
     Game =
     {
         board: Board
