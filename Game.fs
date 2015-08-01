@@ -10,13 +10,13 @@ type Board = Cell list
 
 type Position = int
 
-type Move = Game -> Position * Symbol
+type Strategy = Game -> Position
 
 and [<NoEquality>] [<NoComparison>]
     Player =
     {
         symbol: Symbol
-        strategy: Game -> Move
+        strategy: Strategy
     }
 
 and [<NoEquality>] [<NoComparison>]
@@ -29,6 +29,7 @@ and [<NoEquality>] [<NoComparison>]
 
 type Failures =
     | PositionFull
+    | PositionNotInRange
 
 let updateListAt index value list =
     List.mapi (fun i x -> if i = index then value else x) list
@@ -42,8 +43,10 @@ let empty position board =
 
 let full position board = empty position board |> not
 
-let validateMove player position game =
+let validateMove position game =
     match game with
+    | _ when not (1 <= position && position <= 9) ->
+        Failure PositionNotInRange
     | _ when full position game.board ->
         Failure PositionFull
     | _ ->
@@ -54,10 +57,21 @@ let swapPlayers game =
     {game with
         nextPlayer = if game.nextPlayer.symbol = p1.symbol then p2 else p1}
 
-let tryPlayMove player (position:Position) game =
-    match validateMove player position game with
+let tryPlayMove (position:Position) symbol game =
+    match validateMove position game with
     | Success _ ->
-        {game with board = updateBoard player.symbol position game.board}
+        {game with board = updateBoard symbol position game.board}
         |> swapPlayers
         |> Success
-    | Failure f -> Failure (f, player, position, game)
+    | Failure f -> Failure (f, symbol, position, game)
+
+let playtoCompletion drawGameResult game =
+    let rec loop game =
+        let currentPlayer = game.nextPlayer
+        let position = currentPlayer.strategy game
+        let symbol = currentPlayer.symbol
+        tryPlayMove position symbol game
+        |> drawGameResult
+        |> loop
+    drawGameResult (Success game) |> ignore
+    loop game

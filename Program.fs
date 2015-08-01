@@ -22,44 +22,55 @@ let renderBoard board =
         |> String.concat ""
     | _ -> ""
 
+let printSpaced s =
+    printfn "%s" ""
+    printfn "%s" s
+    
+
 let drawGame game =
-    game.board |> renderBoard |> printfn "%s"
+    game.board |> renderBoard |> printSpaced
     game
 
 let drawGameResult gameResult =
     match gameResult with
     | Success g ->
         drawGame g
-    | Failure (failure, player, position, game) ->
+    | Failure (failure, symbol, position, game) ->
         let message =
             match failure with
             | PositionFull ->
-                "Position " + position.ToString() + " is full"
-        printfn "%s" message
+                "-- Position " + position.ToString() + " is full!"
+            | PositionNotInRange ->
+                "-- Position " + position.ToString() + " is not in the range 1-9!"
+        printSpaced message
         game
 
-let makeGame playerXInput playerOInput =
+let getPositionFromConsole symbol =
+    let readInput () = Console.ReadLine () |> int
+    let rec loop () =
+        try
+            readInput ()
+        with :? FormatException ->
+            printSpaced ("-- Invalid number. Try again:")
+            loop ()
+    printSpaced ("Player " + symbolString symbol + ": Enter your move:")
+    loop ()
+
+let humanPlayer symbol =
+    let humanStrategy = fun _ -> getPositionFromConsole symbol
+    {symbol = symbol; strategy = humanStrategy}
+
+let makeGame p1 p2 =
     let startingBoard = List.init 9 (fun _ -> Empty)
-    let playerX = {symbol = X; strategy = playerXInput}
-    let playerO = {symbol = O; strategy = playerOInput}
     {
         board = startingBoard
-        players = playerX, playerO
-        nextPlayer = playerX
+        players = p1, p2
+        nextPlayer = p1
     }
 
 [<EntryPoint>]
 let main argv = 
-    let dummyStrategy =
-        let dummyMove =
-            (fun _ -> 1, X)
-        (fun _ -> dummyMove)
-    let game = makeGame dummyStrategy dummyStrategy
-    let (p1, p2) = game.players
-    game |> drawGame
-    |> tryPlayMove p1 1 |> drawGameResult
-    |> tryPlayMove p2 2 |> drawGameResult
-    |> tryPlayMove p1 9 |> drawGameResult
-    |> ignore
+    let game = makeGame (humanPlayer X) (humanPlayer O)
+    game |> playtoCompletion drawGameResult |> ignore
     Console.ReadLine () |> ignore
     0
