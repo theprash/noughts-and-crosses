@@ -36,7 +36,7 @@ type [<NoEquality>] [<NoComparison>]
         status: Status
     }
 
-type Failures =
+type Failure =
     | PositionFull
     | PositionNotInRange
 
@@ -68,23 +68,47 @@ let swapNextPlayer game =
     {game with
         nextPlayer = if game.nextPlayer.symbol = p1.symbol then p2 else p1}
 
+let boardFull = List.exists ((=) Empty) >> not
+
+let winner board = None
+
+let updateStatus game =
+    {game with
+        status =
+            match winner game.board with
+            | Some X -> Complete (Winner X)
+            | Some Y -> Complete (Winner Y)
+            | _ when boardFull game.board -> Complete Draw
+            | None -> InProgress}
+
 let tryPlayMove (position:Position) symbol game =
     match validateMove position game with
     | Success _ ->
         {game with board = updateBoard symbol position game.board}
         |> swapNextPlayer
+        |> updateStatus
         |> Success
-    | Failure f -> Failure (f, symbol, position, game)
+    | Failure failure -> Failure (failure, position, game)
 
-let playtoCompletion drawGameResult game =
+let getGameFromResult = function
+    | Success g -> g
+    | Failure (_, _, g) -> g
+
+let play drawGameResult game =
     let rec loop game =
         let currentPlayer = game.nextPlayer
         let symbol = currentPlayer.symbol
         let position = currentPlayer.strategy game.board symbol
-        tryPlayMove position symbol game
-        |> drawGameResult
-        |> loop
-    drawGameResult (Success game) |> ignore
+        let gameResult = tryPlayMove position symbol game
+        drawGameResult gameResult
+        let nextGame = getGameFromResult gameResult
+        match nextGame.status with
+        | InProgress ->
+            loop nextGame
+        | Complete Draw
+        | Complete (Winner _) ->
+            nextGame
+    drawGameResult (Success game)
     loop game
 
 let makeGame playerXStrategy playerOStrategy =

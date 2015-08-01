@@ -27,14 +27,19 @@ let printSpaced s =
     
 let drawGame game =
     game.board |> renderBoard |> printSpaced
-    game
 
 let drawGameResult gameResult =
     match gameResult with
-    | Success g ->
+    | Success game ->
         System.Console.Clear ()
-        drawGame g
-    | Failure (failure, symbol, position, game) ->
+        drawGame game
+        match game.status with
+        | InProgress -> ()
+        | Complete Draw ->
+            printSpaced "Game over! It's a draw."
+        | Complete (Winner X) -> ()
+        | Complete (Winner O) -> ()
+    | Failure (failure, position, game) ->
         let message =
             match failure with
             | PositionFull ->
@@ -42,4 +47,3 @@ let drawGameResult gameResult =
             | PositionNotInRange ->
                 "-- Position " + position.ToString () + " is not in the range 1-9!"
         printSpaced message
-        game
