@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="Result.fs" />
     <Compile Include="Game.fs" />
+    <Compile Include="Draw.fs" />
+    <Compile Include="Human.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>

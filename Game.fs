@@ -10,7 +10,7 @@ type Board = Cell list
 
 type Position = int
 
-type Strategy = Game -> Position
+type Strategy = Game -> Symbol -> Position
 
 and [<NoEquality>] [<NoComparison>]
     Player =
@@ -30,6 +30,8 @@ and [<NoEquality>] [<NoComparison>]
 type Failures =
     | PositionFull
     | PositionNotInRange
+
+let symbolString = function X -> "X" | O -> "O"
 
 let updateListAt index value list =
     List.mapi (fun i x -> if i = index then value else x) list
@@ -68,10 +70,20 @@ let tryPlayMove (position:Position) symbol game =
 let playtoCompletion drawGameResult game =
     let rec loop game =
         let currentPlayer = game.nextPlayer
-        let position = currentPlayer.strategy game
         let symbol = currentPlayer.symbol
+        let position = currentPlayer.strategy game symbol
         tryPlayMove position symbol game
         |> drawGameResult
         |> loop
     drawGameResult (Success game) |> ignore
     loop game
+
+let makeGame playerXStrategy playerOStrategy =
+    let startingBoard = List.init 9 (fun _ -> Empty)
+    let playerX = {symbol = X; strategy = playerXStrategy}
+    let playerO = {symbol = O; strategy = playerOStrategy}
+    {
+        board = startingBoard
+        players = playerX, playerO
+        nextPlayer = playerX
+    }
