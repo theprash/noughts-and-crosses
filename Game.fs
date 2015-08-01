@@ -46,19 +46,15 @@ let updateListAt index value list =
     List.mapi (fun i x -> if i = index then value else x) list
 
 let updateBoard symbol position board =
-    let cell = Full symbol
-    updateListAt (position - 1) cell board
+    updateListAt (position - 1) (Full symbol) board
 
-let empty position board =
-    List.nth board (position - 1) = Empty
-
-let full position board = empty position board |> not
+let getCell position board = List.nth board (position - 1)
 
 let validateMove position game =
     match game with
     | _ when not (1 <= position && position <= 9) ->
         Failure PositionNotInRange
-    | _ when full position game.board ->
+    | _ when getCell position game.board <> Empty ->
         Failure PositionFull
     | _ ->
         Success ()
@@ -70,12 +66,12 @@ let swapNextPlayer game =
 
 let boardFull = List.exists ((=) Empty) >> not
 
-let winner board = None
+let getWinner board = None
 
 let updateStatus game =
     {game with
         status =
-            match winner game.board with
+            match getWinner game.board with
             | Some X -> Complete (Winner X)
             | Some Y -> Complete (Winner Y)
             | _ when boardFull game.board -> Complete Draw
