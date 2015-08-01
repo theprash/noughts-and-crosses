@@ -19,12 +19,21 @@ type [<NoEquality>] [<NoComparison>]
         strategy: Strategy
     }
 
+type Outcome =
+    | Draw
+    | Winner of Symbol
+
+type Status =
+    | InProgress
+    | Complete of Outcome
+
 type [<NoEquality>] [<NoComparison>]
     Game =
     {
         board: Board
         players: Player * Player
         nextPlayer: Player
+        status: Status
     }
 
 type Failures =
@@ -86,4 +95,5 @@ let makeGame playerXStrategy playerOStrategy =
         board = startingBoard
         players = playerX, playerO
         nextPlayer = playerX
+        status = InProgress
     }
