@@ -52,7 +52,7 @@ let validateMove position game =
     | _ ->
         Success ()
 
-let swapPlayers game =
+let swapNextPlayer game =
     let (p1, p2) = game.players
     {game with
         nextPlayer = if game.nextPlayer.symbol = p1.symbol then p2 else p1}
@@ -61,7 +61,7 @@ let tryPlayMove (position:Position) symbol game =
     match validateMove position game with
     | Success _ ->
         {game with board = updateBoard symbol position game.board}
-        |> swapPlayers
+        |> swapNextPlayer
         |> Success
     | Failure f -> Failure (f, symbol, position, game)
 
