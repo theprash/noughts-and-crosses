@@ -105,8 +105,7 @@ let play drawGameResult game =
         match nextGame.status with
         | InProgress ->
             loop nextGame
-        | Complete Draw
-        | Complete (Winner _) ->
+        | Complete _ ->
             nextGame
     drawGameResult (Success game)
     loop game
