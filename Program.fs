@@ -1,10 +1,12 @@
 ﻿open Game
+open Result
+
+let symbolString = function X -> "X" | O -> "O"
 
 let renderBoard board =
     let cellToString =
         function
-        | _, Full X -> "X"
-        | _, Full O -> "O"
+        | _, Full s -> symbolString s
         | position, Empty -> position.ToString()
 
     let characters = List.zip [1 .. 9] board |> List.map cellToString
