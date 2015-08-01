@@ -1,5 +1,6 @@
 ﻿open Game
 open Result
+open System
 
 let symbolString = function X -> "X" | O -> "O"
 
@@ -25,6 +26,18 @@ let drawGame game =
     game.board |> renderBoard |> printfn "%s"
     game
 
+let drawGameResult gameResult =
+    match gameResult with
+    | Success g ->
+        drawGame g
+    | Failure (failure, player, position, game) ->
+        let message =
+            match failure with
+            | PositionFull ->
+                "Position " + position.ToString() + " is full"
+        printfn "%s" message
+        game
+
 let makeGame playerXInput playerOInput =
     let startingBoard = List.init 9 (fun _ -> Empty)
     let playerX = {symbol = X; strategy = playerXInput}
@@ -44,9 +57,9 @@ let main argv =
     let game = makeGame dummyStrategy dummyStrategy
     let (p1, p2) = game.players
     game |> drawGame
-    |> playMove p1 1 |> drawGame
-    |> playMove p2 2 |> drawGame
-    |> playMove p1 9 |> drawGame
+    |> tryPlayMove p1 1 |> drawGameResult
+    |> tryPlayMove p2 2 |> drawGameResult
+    |> tryPlayMove p1 9 |> drawGameResult
     |> ignore
-    System.Console.ReadLine () |> ignore
+    Console.ReadLine () |> ignore
     0
