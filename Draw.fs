@@ -36,9 +36,9 @@ let drawGameResult gameResult =
         match game.status with
         | InProgress -> ()
         | Complete Draw ->
-            printSpaced "Game over! It's a draw."
-        | Complete (Winner X) -> ()
-        | Complete (Winner O) -> ()
+            printSpaced "Game over. It's a draw."
+        | Complete (Winner s) ->
+            printSpaced ("Game over. Player " + symbolString s + " won!")
     | Failure (failure, position, game) ->
         let message =
             match failure with

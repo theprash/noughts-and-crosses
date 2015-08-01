@@ -42,6 +42,33 @@ type Failure =
 
 let symbolString = function X -> "X" | O -> "O"
 
+/// A line is a set of 3 positions that would result in a win
+let lines =
+    [
+        // Horizontals
+        set [1; 2; 3]
+        set [4; 5; 6]
+        set [7; 8; 9]
+
+        // Verticals
+        set [1; 4; 7]
+        set [2; 5; 8]
+        set [3; 6; 9]
+
+        // Diagonals
+        set [1; 5; 9]
+        set [3; 5; 7]
+    ]
+
+let groupPositionsByCell board =
+    board
+    |> Seq.zip [1 .. 9]
+    |> Seq.groupBy snd
+    |> Seq.map (fun (value, positionAndCells) ->
+        let positions = positionAndCells |> Seq.map fst
+        value, Set.ofSeq positions)
+    |> Map.ofSeq
+
 let updateListAt index value list =
     List.mapi (fun i x -> if i = index then value else x) list
 
@@ -66,7 +93,24 @@ let swapNextPlayer game =
 
 let boardFull = List.exists ((=) Empty) >> not
 
-let getWinner board = None
+let getWinner board =
+    let groups = groupPositionsByCell board
+    let getPositions symbol =
+        defaultArg
+            (Map.tryFind (Full symbol) groups)
+            Set.empty
+    let containsLine positions =
+        Seq.exists (Set.isSuperset positions) lines
+
+    let XPositions = getPositions X
+    let OPositions = getPositions O
+
+    if containsLine XPositions then
+        Some X
+    else if containsLine OPositions then
+        Some O
+    else
+        None
 
 let updateStatus game =
     {game with
