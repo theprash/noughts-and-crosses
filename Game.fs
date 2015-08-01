@@ -10,7 +10,7 @@ type Board = Cell list
 
 type Position = int
 
-type Strategy = Game -> Symbol -> Position
+type Strategy = Board -> Symbol -> Position
 
 and [<NoEquality>] [<NoComparison>]
     Player =
@@ -71,7 +71,7 @@ let playtoCompletion drawGameResult game =
     let rec loop game =
         let currentPlayer = game.nextPlayer
         let symbol = currentPlayer.symbol
-        let position = currentPlayer.strategy game symbol
+        let position = currentPlayer.strategy game.board symbol
         tryPlayMove position symbol game
         |> drawGameResult
         |> loop
