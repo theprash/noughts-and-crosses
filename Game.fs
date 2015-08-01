@@ -69,6 +69,11 @@ let groupPositionsByCell board =
         value, Set.ofSeq positions)
     |> Map.ofSeq
 
+let getPositions cell groups =
+    defaultArg
+        (Map.tryFind cell groups)
+        Set.empty
+
 let updateListAt index value list =
     List.mapi (fun i x -> if i = index then value else x) list
 
@@ -95,15 +100,11 @@ let boardFull = List.exists ((=) Empty) >> not
 
 let getWinner board =
     let groups = groupPositionsByCell board
-    let getPositions symbol =
-        defaultArg
-            (Map.tryFind (Full symbol) groups)
-            Set.empty
     let containsLine positions =
         Seq.exists (Set.isSuperset positions) lines
 
-    let XPositions = getPositions X
-    let OPositions = getPositions O
+    let XPositions = getPositions (Full X) groups
+    let OPositions = getPositions (Full O) groups
 
     if containsLine XPositions then
         Some X
