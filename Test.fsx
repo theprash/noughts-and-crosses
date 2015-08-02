@@ -30,8 +30,7 @@ let allGamesAndOrders =
     allStrategiesAndOrders |> Seq.map (fun (strategy, order) ->
         let game = makeGame strategy UnbeatableComputer.strategy
         let draw = (fun _ -> ())
-        play draw game, order
-    )
+        play draw game, order)
 
 let lostGamesStrategies =
     allGamesAndOrders
