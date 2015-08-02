@@ -7,7 +7,7 @@ The computer strategy will be:
  - If you have a winning move, then play there to block it
  - If I have a move that creates two possible winning moves (a "winning setup"), then play there
  - If you have a move that creates two possible winning moves, then play there to block it
- - Otherwise play in the lowest available position (deterministic behaviour may simplify testing)
+ - Otherwise play the first in a hard-coded list of key positions (centre, then corners, then rest)
 
 This should avoid a loss, while making a reasonable attempt to win.
 *)
@@ -57,9 +57,11 @@ let yourWinningSetup board mySymbol groups =
     let yourSymbol = other mySymbol
     winningSetup board yourSymbol groups
 
-
-let lowestAvailable mySymbol groups =
-    getPositions Empty groups |> Set.minElement |> Some
+let bestRemainingPosition mySymbol groups =
+    let emptyPositions = getPositions Empty groups
+    [5; 1; 3; 7; 9; 2; 4; 6; 8]
+    |> Seq.filter (fun p -> Set.contains p emptyPositions)
+    |> Seq.tryPick Some
 
 let bestMoves board mySymbol groups =
     seq {
@@ -67,7 +69,7 @@ let bestMoves board mySymbol groups =
         yield yourWinningMove mySymbol groups
         yield myWinningSetup board mySymbol groups
         yield yourWinningSetup board mySymbol groups
-        yield lowestAvailable mySymbol groups
+        yield bestRemainingPosition mySymbol groups
     }
     |> Seq.choose id
 

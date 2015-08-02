@@ -36,10 +36,12 @@ let allGamesAndOrders =
 let lostGamesStrategies =
     allGamesAndOrders
     |> Seq.filter (fun (game, _) -> game.status = Complete (Winner X))
+    |> Seq.toList
 
 lostGamesStrategies
-|> Seq.truncate 3
 |> Seq.iter (fun (game, order) ->
     Draw.drawGame game
     printfn "%A" order
     printfn "%s" "")
+
+printfn "%A" (List.length lostGamesStrategies)
