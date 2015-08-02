@@ -136,20 +136,21 @@ let getGameFromResult = function
     | Failure (_, _, g) -> g
 
 let play drawGameResult game =
-    let rec loop game =
+    let rec loop game acc =
         let currentPlayer = game.nextPlayer
         let symbol = currentPlayer.symbol
         let position = currentPlayer.strategy game.board symbol
         let gameResult = tryPlayMove position symbol game
         drawGameResult gameResult
         let nextGame = getGameFromResult gameResult
+        let nextAcc = (nextGame, symbol, position) :: acc
         match nextGame.status with
         | InProgress ->
-            loop nextGame
+            loop nextGame nextAcc
         | Complete _ ->
-            nextGame
+            List.rev nextAcc
     drawGameResult (Success game)
-    loop game
+    loop game []
 
 let makeGame playerXStrategy playerOStrategy =
     let startingBoard = List.init 9 (fun _ -> Empty)
