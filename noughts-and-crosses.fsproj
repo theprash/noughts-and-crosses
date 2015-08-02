@@ -55,6 +55,7 @@
     <Compile Include="Human.fs" />
     <Compile Include="UnbeatableComputer.fs" />
     <Compile Include="Program.fs" />
+    <None Include="Test.fsx" />
     <None Include="App.config" />
   </ItemGroup>
   <PropertyGroup>
