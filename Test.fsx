@@ -42,4 +42,4 @@ lostGamesStrategies
 |> Seq.iter (fun (game, order) ->
     Draw.drawGame game
     printfn "%A" order
-    printfn "%A" "")
+    printfn "%s" "")
