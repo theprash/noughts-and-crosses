@@ -76,18 +76,17 @@ let bestRemainingPosition mySymbol groups =
     |> Seq.filter (fun p -> Set.contains p emptyPositions)
     |> Seq.tryPick Some
 
-let bestMoves board mySymbol groups =
-    seq {
-        yield myWinningMove mySymbol groups
-        yield yourWinningMove mySymbol groups
-        yield specialCaseMove mySymbol groups
-        yield myWinningSetup board mySymbol groups
-        yield yourWinningSetup board mySymbol groups
-        yield bestRemainingPosition mySymbol groups
-    }
-    |> Seq.choose id
-
 let strategy board mySymbol =
     let groups = groupPositionsByCell board
-    bestMoves board mySymbol groups
+    let bestMoves =
+        seq {
+            yield myWinningMove mySymbol groups
+            yield yourWinningMove mySymbol groups
+            yield specialCaseMove mySymbol groups
+            yield myWinningSetup board mySymbol groups
+            yield yourWinningSetup board mySymbol groups
+            yield bestRemainingPosition mySymbol groups
+        }
+        |> Seq.choose id
+    bestMoves
     |> Seq.pick Some
