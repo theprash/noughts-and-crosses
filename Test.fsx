@@ -29,7 +29,7 @@ let positionOrderingStrategy positions board _ =
 let allStrategies =
     allPositionOrderings |> Seq.map (fun order -> positionOrderingStrategy order)
 
-let allGames =
+let allGameHistories =
     allStrategies
     |> Seq.toArray
     |> Array.Parallel.map (fun strategy ->
@@ -37,12 +37,14 @@ let allGames =
         let draw = (fun _ -> ())
         play draw game)
 
-let lostGames =
-    allGames
-    |> Seq.filter (fun gameHistory ->
-        let (game, _, _) = gameHistory |> List.rev |> List.head
-        game.status = Complete (Winner X))
-    |> Seq.toList
+let outcome gameHistory =
+    let (game, _, _) = gameHistory |> List.rev |> List.head
+    match game.status with
+    | Complete result -> result
+    | _ -> raise (System.Exception "Game did not complete.")
+
+let groupedByOutcome =
+    allGameHistories |> Seq.groupBy outcome |> Map.ofSeq
 
 let printMoves history = 
     history
@@ -50,8 +52,19 @@ let printMoves history =
     |> String.concat "  ->  "
     |> printfn "%s"
 
-lostGames
-|> List.iter printMoves
+let gamesWithResult result =
+    match Map.tryFind result groupedByOutcome with
+    | Some histories -> histories
+    | None -> seq []
 
-printfn "%s" ("Failing cases: " + (List.length lostGames).ToString ())
-printfn "%s" ("Minutes elapsed: " + stopwatch.Elapsed.TotalMinutes.ToString ())
+let lostGames = gamesWithResult (Winner X)
+let drawnGames = gamesWithResult Draw
+let wonGames = gamesWithResult (Winner O)
+
+lostGames
+|> Seq.iter printMoves
+
+printfn "%s" ("Games won: " + (Seq.length wonGames |> string))
+printfn "%s" ("Games drawn: " + (Seq.length drawnGames |> string))
+printfn "%s" ("Games lost: " + (Seq.length lostGames |> string))
+printfn "%s" ("Minutes elapsed: " + (stopwatch.Elapsed.TotalMinutes |> string))
