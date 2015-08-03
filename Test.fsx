@@ -31,7 +31,8 @@ let allStrategies =
 
 let allGames =
     allStrategies
-    |> Seq.map (fun strategy ->
+    |> Seq.toArray
+    |> Array.Parallel.map (fun strategy ->
         let game = makeGame strategy UnbeatableComputer.strategy
         let draw = (fun _ -> ())
         play draw game)
