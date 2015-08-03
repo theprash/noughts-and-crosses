@@ -16,6 +16,9 @@ module List =
         | []      -> seq [ [] ]
         | x :: xs -> Seq.concat (Seq.map (insertions x) (permutations xs))
 
+let stopwatch = System.Diagnostics.Stopwatch ()
+stopwatch.Start ()
+
 let allPositionOrderings = List.permutations [1..9]
 
 let positionOrderingStrategy positions board _ =
@@ -23,24 +26,32 @@ let positionOrderingStrategy positions board _ =
     let emptyPositions = getPositions Empty groups
     positions |> List.find (fun p -> Set.contains p emptyPositions)
 
-let allStrategiesAndOrders : seq<Strategy * int list> =
-    allPositionOrderings |> Seq.map (fun order -> positionOrderingStrategy order, order)
+let allStrategies =
+    allPositionOrderings |> Seq.map (fun order -> positionOrderingStrategy order)
 
-let allGamesAndOrders =
-    allStrategiesAndOrders |> Seq.map (fun (strategy, order) ->
+let allGames =
+    allStrategies
+    |> Seq.map (fun strategy ->
         let game = makeGame strategy UnbeatableComputer.strategy
         let draw = (fun _ -> ())
-        play draw game, order)
+        play draw game)
 
-let lostGamesStrategies =
-    allGamesAndOrders
-    |> Seq.filter (fun (game, _) -> game.status = Complete (Winner X))
+let lostGames =
+    allGames
+    |> Seq.filter (fun gameHistory ->
+        let (game, _, _) = gameHistory |> List.rev |> List.head
+        game.status = Complete (Winner X))
+    |> Seq.truncate 3
     |> Seq.toList
 
-lostGamesStrategies
-|> Seq.iter (fun (game, order) ->
-    Draw.drawGame game
-    printfn "%A" order
-    printfn "%s" "")
+let printMoves history = 
+    history
+    |> List.map (fun (game, symbol, position) -> (symbolString symbol) + " " + position.ToString ())
+    |> String.concat "  ->  "
+    |> printfn "%s"
 
-printfn "%A" (List.length lostGamesStrategies)
+lostGames
+|> List.iter printMoves
+
+printfn "%s" ("Failing cases: " + (List.length lostGames).ToString ())
+printfn "%s" ("Minutes elapsed: " + stopwatch.Elapsed.TotalMinutes.ToString ())
