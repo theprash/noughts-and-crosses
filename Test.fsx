@@ -41,7 +41,6 @@ let lostGames =
     |> Seq.filter (fun gameHistory ->
         let (game, _, _) = gameHistory |> List.rev |> List.head
         game.status = Complete (Winner X))
-    |> Seq.truncate 3
     |> Seq.toList
 
 let printMoves history = 
