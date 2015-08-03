@@ -5,11 +5,10 @@ open Game
 The computer strategy will be:
  - If I have a winning move, then play it
  - If you have a winning move, then play there to block it
+ - Special case: If I have the centre and you have two opposite corners then play on a side
  - If I have a move that creates two possible winning moves (a "winning setup"), then play there
  - If you have a move that creates two possible winning moves, then play there to block it
  - Otherwise play the first in a hard-coded list of key positions (centre, then corners, then rest)
-
-This should avoid a loss, while making a reasonable attempt to win.
 *)
 
 let winningMoves symbol groups =
@@ -43,6 +42,20 @@ let createsTwoWinningMoves board symbol position =
     |> List.length
     |> (<) 1
 
+let oppositeCorners = [set [1; 9]; set [3; 7] ]
+
+let specialCaseMove mySymbol groups =
+    let myPositions = getPositions (Full mySymbol) groups
+    let yourSymbol = other mySymbol
+    let yourPositions = getPositions (Full yourSymbol) groups
+    let iHaveCenter = myPositions = set [5]
+    let youHaveOppositeCorners =
+        List.exists ((=) yourPositions) oppositeCorners
+    if iHaveCenter && youHaveOppositeCorners then
+        Some 2
+    else
+        None
+
 let winningSetup board symbol groups =
     let emptyPositions = getPositions Empty groups
     emptyPositions
@@ -67,6 +80,7 @@ let bestMoves board mySymbol groups =
     seq {
         yield myWinningMove mySymbol groups
         yield yourWinningMove mySymbol groups
+        yield specialCaseMove mySymbol groups
         yield myWinningSetup board mySymbol groups
         yield yourWinningSetup board mySymbol groups
         yield bestRemainingPosition mySymbol groups
