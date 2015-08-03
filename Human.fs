@@ -13,4 +13,4 @@ let getPositionFromConsole symbol =
     Draw.printSpaced ("Player " + symbolString symbol + ", Enter your move:")
     loop ()
 
-let strategy _ symbol = getPositionFromConsole symbol
+let strategy _ = getPositionFromConsole
