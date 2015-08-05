@@ -36,7 +36,7 @@ type [<NoEquality>] [<NoComparison>]
         status: Status
     }
 
-type Failure =
+type MoveFailure =
     | PositionFull
     | PositionNotInRange
 
@@ -82,15 +82,6 @@ let updateBoard symbol position board =
 
 let getCell position board = List.nth board (position - 1)
 
-let validateMove position game =
-    match game with
-    | _ when not (1 <= position && position <= 9) ->
-        Failure PositionNotInRange
-    | _ when getCell position game.board <> Empty ->
-        Failure PositionFull
-    | _ ->
-        Success ()
-
 let swapNextPlayer game =
     let (p1, p2) = game.players
     {game with
@@ -123,13 +114,15 @@ let updateStatus game =
             | None -> InProgress}
 
 let tryPlayMove (position:Position) symbol game =
-    match validateMove position game with
-    | Success _ ->
+    if not (1 <= position && position <= 9) then
+        Failure (PositionNotInRange, position, game)
+    else if getCell position game.board <> Empty then
+        Failure (PositionFull, position, game)
+    else
         {game with board = updateBoard symbol position game.board}
         |> swapNextPlayer
         |> updateStatus
         |> Success
-    | Failure failure -> Failure (failure, position, game)
 
 let getGameFromResult = function
     | Success g -> g
