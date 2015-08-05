@@ -12,10 +12,10 @@ The computer strategy will be:
 *)
 
 let winningMoves symbol groups =
-    let fullPositions = getPositions (Full symbol) groups
+    let myPositions = getPositions (Full symbol) groups
     let emptyPositions = getPositions Empty groups
     lines
-    |> List.map (fun line -> Set.difference line fullPositions) // remove the full positions
+    |> List.map (fun line -> Set.difference line myPositions) // remove the full positions
     |> List.filter (Set.count >> ((=) 1)) // keep those with one position left
     |> List.filter (Set.isSuperset emptyPositions) // keep those that are for empty positions
     |> List.collect Set.toList
@@ -27,10 +27,10 @@ let winningMove symbol groups =
 
 let myWinningMove = winningMove
 
-let other = function X -> O | O -> X
+let otherSymbol = function X -> O | O -> X
 
 let yourWinningMove mySymbol groups =
-    let yourSymbol = other mySymbol
+    let yourSymbol = otherSymbol mySymbol
     winningMove yourSymbol groups
 
 let createsTwoWinningMoves board symbol position =
@@ -46,7 +46,7 @@ let oppositeCorners = [set [1; 9]; set [3; 7] ]
 
 let specialCaseMove mySymbol groups =
     let myPositions = getPositions (Full mySymbol) groups
-    let yourSymbol = other mySymbol
+    let yourSymbol = otherSymbol mySymbol
     let yourPositions = getPositions (Full yourSymbol) groups
     let iHaveCenter = myPositions = set [5]
     let youHaveOppositeCorners =
@@ -67,7 +67,7 @@ let winningSetup board symbol groups =
 let myWinningSetup = winningSetup
 
 let yourWinningSetup board mySymbol groups =
-    let yourSymbol = other mySymbol
+    let yourSymbol = otherSymbol mySymbol
     winningSetup board yourSymbol groups
 
 let bestRemainingPosition mySymbol groups =
@@ -78,7 +78,7 @@ let bestRemainingPosition mySymbol groups =
 
 let strategy board mySymbol =
     let groups = groupPositionsByCell board
-    let bestMoves =
+    let bestToWorstMoves =
         seq {
             yield myWinningMove mySymbol groups
             yield yourWinningMove mySymbol groups
@@ -88,5 +88,5 @@ let strategy board mySymbol =
             yield bestRemainingPosition mySymbol groups
         }
         |> Seq.choose id
-    bestMoves
+    bestToWorstMoves
     |> Seq.pick Some
