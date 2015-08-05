@@ -7,9 +7,9 @@ let getPositionFromConsole symbol =
         try
             Console.ReadLine () |> int
         with :? FormatException ->
-            Draw.printSpaced ("-- Invalid number. Try again:")
+            printfn "%s" ("-- Invalid number. Try again:")
             loop ()
-    Draw.printSpaced ("Player " + symbolString symbol + ", Enter your move:")
+    printfn "%s" ("Player " + symbolString symbol + ", Enter your move:")
     loop ()
 
 let strategy _ = getPositionFromConsole

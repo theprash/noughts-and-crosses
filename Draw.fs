@@ -21,12 +21,8 @@ let renderBoard board =
         |> String.concat ""
     | _ -> ""
 
-let printSpaced s =
-    printfn "%s" ""
-    printfn "%s" s
-    
 let drawGame game =
-    game.board |> renderBoard |> printSpaced
+    game.board |> renderBoard |> printfn "%s"
 
 let drawGameResult gameResult =
     match gameResult with
@@ -36,9 +32,9 @@ let drawGameResult gameResult =
         match game.status with
         | InProgress -> ()
         | Complete Draw ->
-            printSpaced "-- Game over. It's a draw."
+            printfn "%s" "-- Game over. It's a draw."
         | Complete (Winner s) ->
-            printSpaced ("-- Game over. Player " + symbolString s + " won!")
+            printfn "%s" ("-- Game over. Player " + symbolString s + " won!")
     | Failure (failure, position, game) ->
         let message =
             match failure with
@@ -46,4 +42,4 @@ let drawGameResult gameResult =
                 "-- Position " + position.ToString () + " is full!"
             | PositionNotInRange ->
                 "-- Position " + position.ToString () + " is not in the range 1-9!"
-        printSpaced message
+        printfn "%s" message
