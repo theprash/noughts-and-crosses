@@ -3,10 +3,9 @@ open Game
 open System
 
 let getPositionFromConsole symbol =
-    let readInput () = Console.ReadLine () |> int
     let rec loop () =
         try
-            readInput ()
+            Console.ReadLine () |> int
         with :? FormatException ->
             Draw.printSpaced ("-- Invalid number. Try again:")
             loop ()
